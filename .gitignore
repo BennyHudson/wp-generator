@@ -1,1 +1,53 @@
-.env*
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# Environment Variables
+.env.*
+
+# Build outputs
+/dist
+/build
+/out
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary files
+*.swp
+*.swo
+*~
