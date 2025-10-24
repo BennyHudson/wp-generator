@@ -1,0 +1,24 @@
+{
+  "name": "wp-generator",
+  "version": "1.0.0",
+  "description": "Wordpress CMS generator",
+  "license": "ISC",
+  "author": "Ben Hudson",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "generate": "node --loader ts-node/esm index.ts",
+    "test": "test"
+  },
+  "dependencies": {
+    "@types/node": "^24.9.1",
+    "@types/prompts": "^2.4.9",
+    "dotenv": "^17.2.3",
+    "lodash": "^4.17.21",
+    "prettier": "^3.6.2",
+    "prompts": "^2.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+}
