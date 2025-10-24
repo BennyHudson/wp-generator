@@ -130,13 +130,42 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
 
   spawn.sync(
     'wp',
+    ['language', 'plugin', 'update', '--all', `--path=${projectPath}`],
+    {
+      stdio: 'inherit',
+    }
+  )
+
+  spawn.sync(
+    'wp',
+    ['language', 'theme', 'update', '--all', `--path=${projectPath}`],
+    {
+      stdio: 'inherit',
+    }
+  )
+
+  spawn.sync(
+    'wp',
     ['theme', 'activate', 'wedo-headless', `--path=${projectPath}`],
     {
       stdio: 'inherit',
     }
   )
 
+  fs.writeFileSync(
+    `${projectPath}/readme.md`,
+    `Wordpress CMS for ${response.projectName} - Built from (wedo-headless-starter)[https://github.com/BennyHudson/wedo-headless-starter] - use \`wp server\` to run locally`
+  )
+
   spawn.sync('git', ['add', '.'], { stdio: 'inherit' })
   spawn.sync('git', ['commit', '-m', 'Initial commit'], { stdio: 'inherit' })
   spawn.sync('git', ['push', '-u', 'origin', 'main'], { stdio: 'inherit' })
+
+  spawn.sync(
+    'wp',
+    ['server', `--path=${projectPath}`, '--port=8000', '--silent'],
+    {
+      stdio: 'inherit',
+    }
+  )
 })()
