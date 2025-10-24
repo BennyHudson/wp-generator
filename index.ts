@@ -163,7 +163,7 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
 
   spawn.sync(
     'wp',
-    ['server', `--path=${projectPath}`, '--port=8000', '--silent'],
+    ['server', `--path=${projectPath}`, '--port=8000', '--quiet'],
     {
       stdio: 'inherit',
     }
