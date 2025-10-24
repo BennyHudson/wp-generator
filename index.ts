@@ -49,7 +49,7 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
     },
   ])
 
-  const projectName = `${kebabCase(response.projectName)}-cms`
+  const projectName = `${kebabCase(response.projectName.replace('WordPress', 'wordpress'))}-cms`
   const projectPath = `${response.rootDir}${projectName}`
 
   spawn.sync(
