@@ -1,8 +1,11 @@
+#!/usr/bin/env node
+
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
 import prompts from 'prompts'
 import spawn from 'cross-spawn'
 import pkg from 'lodash'
+import path from 'node:path'
 
 const { kebabCase } = pkg
 
@@ -15,7 +18,7 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
       type: 'text',
       message: 'Where should we create the project?',
       name: 'rootDir',
-      initial: '../',
+      initial: path.resolve(process.cwd()),
     },
     {
       type: 'text',
@@ -50,7 +53,7 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
   ])
 
   const projectName = `${kebabCase(response.projectName.replace('WordPress', 'wordpress'))}-cms`
-  const projectPath = `${response.rootDir}${projectName}`
+  const projectPath = `${response.rootDir}/${projectName}`
 
   spawn.sync(
     'gh',
