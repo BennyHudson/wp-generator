@@ -52,9 +52,24 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
     },
   ])
 
-  const projectName = `${kebabCase(response.projectName.replace('WordPress', 'wordpress'))}-cms`
-  const projectPath = `${response.rootDir}/${projectName}`
+  // derive a safe project name and final path
+  let projectName = `${kebabCase(response.projectName.replace('WordPress', 'wordpress'))}-cms`
+  // ensure rootDir exists
+  fs.ensureDirSync(response.rootDir)
+  let projectPath = path.join(response.rootDir, projectName)
 
+  // if destination already exists, append a timestamp to make the name unique
+  if (fs.existsSync(projectPath)) {
+    const suffix = `-${Date.now()}`
+    projectName = `${projectName}${suffix}`
+    projectPath = path.join(response.rootDir, projectName)
+    console.warn(
+      `Target path exists — using unique project name: ${projectName}`
+    )
+  }
+
+  // Create the GitHub repo and clone directly into the chosen root directory so
+  // we avoid moving across directories and potential "dest already exists" errors.
   spawn.sync(
     'gh',
     [
@@ -67,10 +82,9 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
     ],
     {
       stdio: 'inherit',
+      cwd: response.rootDir,
     }
   )
-
-  fs.moveSync(projectName, projectPath)
 
   spawn.sync(
     'wp',
@@ -123,11 +137,11 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
     { stdio: 'inherit' }
   )
 
-  spawn.sync('wp', ['plugin', 'activate', '--all', `--path=${projectPath}`], {
+  spawn.sync('wp', ['plugin', 'update', '--all', `--path=${projectPath}`], {
     stdio: 'inherit',
   })
 
-  spawn.sync('wp', ['plugin', 'update', '--all', `--path=${projectPath}`], {
+  spawn.sync('wp', ['plugin', 'activate', '--all', `--path=${projectPath}`], {
     stdio: 'inherit',
   })
 
@@ -155,14 +169,99 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
     }
   )
 
-  fs.writeFileSync(
-    `${projectPath}/readme.md`,
-    `Wordpress CMS for ${response.projectName} - Built from (wedo-headless-starter)[https://github.com/BennyHudson/wedo-headless-starter] - use \`wp server\` to run locally`
+  spawn.sync(
+    'wp',
+    [
+      'plugin',
+      'install',
+      'add-wpgraphql-seo',
+      'wordpress-seo',
+      '--activate',
+      `--path=${projectPath}`,
+    ],
+    {
+      stdio: 'inherit',
+    }
   )
 
-  spawn.sync('git', ['add', '.'], { stdio: 'inherit' })
-  spawn.sync('git', ['commit', '-m', 'Initial commit'], { stdio: 'inherit' })
-  spawn.sync('git', ['push', '-u', 'origin', 'main'], { stdio: 'inherit' })
+  const currentReadme = fs.readFileSync(`${projectPath}/readme.md`, 'utf-8')
+
+  const newReadme = `Wordpress CMS for ${response.projectName} - Built from [wedo-headless-starter](https://github.com/BennyHudson/wedo-headless-starter) - use \`wp server\` to run locally.
+
+---
+
+${currentReadme}`
+
+  fs.writeFileSync(`${projectPath}/readme.md`, newReadme)
+  // Ensure git is available in the project directory. If the template clone did not
+  // leave a `.git` directory (some GH template operations can behave differently),
+  // attempt to initialize a repo and attach the remote automatically.
+  const gitDir = path.join(projectPath, '.git')
+  const gitOpts: any = { stdio: 'inherit', cwd: projectPath }
+
+  fs.removeSync(`${projectPath}/readme.html`)
+
+  if (!fs.existsSync(gitDir)) {
+    console.warn(
+      'No .git directory found — attempting to initialize a git repository and attach remote'
+    )
+
+    // try to discover the repository URL using the GitHub CLI
+    let repoUrl = ''
+    try {
+      const view = spawn.sync(
+        'gh',
+        ['repo', 'view', projectName, '--json', 'url', '--jq', '.url'],
+        { encoding: 'utf8' }
+      )
+      if (view && typeof view.stdout === 'string') {
+        repoUrl = view.stdout.trim()
+      }
+    } catch (err) {
+      // ignore - we'll still init a local repo
+    }
+
+    // initialize local repo
+    spawn.sync('git', ['init'], gitOpts)
+
+    if (repoUrl) {
+      // attach remote and attempt to fetch remote branches
+      spawn.sync('git', ['remote', 'add', 'origin', repoUrl], gitOpts)
+      const fetchRes = spawn.sync('git', ['fetch', 'origin'], gitOpts)
+      if (fetchRes.status === 0) {
+        // try to set up main branch to track origin/main
+        spawn.sync(
+          'git',
+          ['checkout', '-b', 'main', '--track', 'origin/main'],
+          gitOpts
+        )
+      }
+    }
+  }
+
+  // Run git operations inside the project directory and tolerate non-fatal failures
+  const addRes = spawn.sync('git', ['add', '.'], gitOpts)
+  if (addRes.status !== 0) {
+    console.warn('git add returned non-zero status; continuing')
+  }
+
+  const commitRes = spawn.sync(
+    'git',
+    ['commit', '-m', 'Initial commit'],
+    gitOpts
+  )
+  if (commitRes.status !== 0) {
+    console.warn(
+      'git commit returned non-zero status; there may be nothing to commit'
+    )
+  }
+
+  const pushRes = spawn.sync('git', ['push', '-u', 'origin', 'main'], gitOpts)
+  if (pushRes.status !== 0) {
+    console.warn(
+      'git push returned non-zero status; you may need to push or configure the remote manually'
+    )
+  }
 
   spawn.sync(
     'wp',

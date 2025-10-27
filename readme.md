@@ -6,6 +6,8 @@ Simple node script for creating a headless WordPress back end using the [wedo.di
 
 In order to correctly run this package, you will need to have [wp-cli](https://wp-cli.org/) and [mySql](https://dev.mysql.com/doc/refman/8.4/en/mysql.html) installed on your machine.
 
+You also need the GitHub CLI (`gh`) installed and authenticated so the generator can create and clone template repositories. Install it from https://cli.github.com/ and run `gh auth login` to connect your account.
+
 ## Installation
 
 You can install the package globally using npm:
