@@ -147,6 +147,21 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
 
   spawn.sync(
     'wp',
+    [
+      'plugin',
+      'install',
+      'add-wpgraphql-seo',
+      'wordpress-seo',
+      '--activate',
+      `--path=${projectPath}`,
+    ],
+    {
+      stdio: 'inherit',
+    }
+  )
+
+  spawn.sync(
+    'wp',
     ['language', 'plugin', 'update', '--all', `--path=${projectPath}`],
     {
       stdio: 'inherit',
@@ -164,21 +179,6 @@ const acfKey = process.env.ACF_PRO_LICENCE || ''
   spawn.sync(
     'wp',
     ['theme', 'activate', 'wedo-headless', `--path=${projectPath}`],
-    {
-      stdio: 'inherit',
-    }
-  )
-
-  spawn.sync(
-    'wp',
-    [
-      'plugin',
-      'install',
-      'add-wpgraphql-seo',
-      'wordpress-seo',
-      '--activate',
-      `--path=${projectPath}`,
-    ],
     {
       stdio: 'inherit',
     }
