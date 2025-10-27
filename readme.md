@@ -29,6 +29,7 @@ generate-wp-cms
 ```
 
 The generator will prompt you for:
+
 - Project directory location
 - Project name
 - WordPress admin username
@@ -38,29 +39,42 @@ The generator will prompt you for:
 
 ### Environment Variables
 
-You can set up default values using a `.env.local` file:
+You can set up default values using a `.env.local` file in the directory where you run the command. For example:
+
+1. If you want to use the generator in your projects directory:
+
+```bash
+cd ~/projects
+touch .env.local
+```
+
+2. Add your ACF Pro license to the `.env.local` file:
 
 ```env
 ACF_PRO_LICENCE=your_acf_pro_license_key
 ```
+
+The generator will look for the `.env.local` file in the current working directory when you run `generate-wp-cms`.
 
 ## Development
 
 To work on the package locally:
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/BennyHudson/wp-generator.git
 cd wp-generator
 ```
 
 2. Install dependencies
+
 ```bash
 yarn install
 ```
 
 3. Run locally
+
 ```bash
 yarn generate
 ```
-
